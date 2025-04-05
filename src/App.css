@@ -1,0 +1,102 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ProgressBar.css */
+
+.progress-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 25px;
+  background-color: #e0e0e0; /* Light gray background */
+  border-radius: 12.5px;
+  overflow: hidden;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.15); /* Optional shadow for depth */
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #81C784); /* Green gradient */
+  width: 0;
+  transition: width 0.4s ease; /* Smooth transition for the width */
+}
+
+.progress-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.85em;
+  color: white;
+  font-weight: bold;
+}
+
+.floating-button {
+  position: fixed;
+  top: 20px;
+  right: 40px;
+  left: 40px;
+  padding: 10px 15px;
+  background-color: #4c68af;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  font-size: 1em;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.floating-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+@font-face {
+  font-family: 'FredokaOne';
+  src: url('fonts/HVD Fonts - MikadoBold.otf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Apply the font to the entire body */
+body {
+  font-family: 'FredokaOne', sans-serif;
+}
