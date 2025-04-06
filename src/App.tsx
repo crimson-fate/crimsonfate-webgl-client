@@ -130,6 +130,14 @@ function App() {
             if (calldata.point) {
               calldata.point = JSON.parse(calldata.point);
             }
+
+            if (calldata.key) {
+              calldata.key = []
+            }
+
+            if (calldata.saltNonce) {
+              calldata.saltNonce = new Date().getTime();
+            }
           } catch (err) {
             console.error("Failed to parse calldata", err);
             calldata = [];
@@ -140,9 +148,9 @@ function App() {
           if (
             entrypoint === Action.receive_skill ||
             entrypoint === Action.receive_angel_or_evil ||
-            entrypoint === Action.start_new_game
+            entrypoint === Action.start_new_game ||
+            entrypoint === Action.accept_or_ignore_evil_skill
           ) {
-            const timestamp = new Date().getTime();
             result = await account.execute([
               {
                 contractAddress: config().VRF_PROVIDER_ADDRESS,
@@ -155,10 +163,7 @@ function App() {
               {
                 contractAddress: config().actionAddress,
                 entrypoint: entrypoint,
-                calldata: CallData.compile({
-                  salt_nonce: timestamp,
-                  key: [],
-                }),
+                calldata: CallData.compile(calldata),
               },
             ]);
           } else {
