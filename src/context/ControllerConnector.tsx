@@ -8,6 +8,7 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { SessionPolicies } from "@cartridge/controller";
 import config from "../config";
 import { Action } from "../constants/actions";
+import { constants } from "starknet";
 
 // Define session policies
 const policies: SessionPolicies = {
@@ -62,7 +63,12 @@ const policies: SessionPolicies = {
 const connector = [
   new ControllerConnector({
     policies,
-    rpc: "https://api.cartridge.gg/x/starknet/sepolia",
+    defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
+    chains: [
+      {
+        rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia",
+      },
+    ],
   }),
 ];
 
