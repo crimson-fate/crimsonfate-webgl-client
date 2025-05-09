@@ -1,31 +1,34 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/icon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <!-- <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.socket.io/4.3.2/socket.io.min.js" integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs" crossOrigin="anonymous"></script> -->
-    <title>Crimson Fate</title>
-    <script>
-      document.addEventListener('DOMContentLoaded', (event) => {
-        console.log("Loading wasm");
-        var dojoScript = window.document.createElement("script");
-        dojoScript.src = "TemplateData/dojo.js/dojo_c.js";
-        dojoScript.onload = async () => {
-          await wasm_bindgen();
-        };
+  <title>Crimson Fate</title>
+  <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+      console.log("Loading wasm");
+      var dojoScript = window.document.createElement("script");
+      dojoScript.src = "TemplateData/dojo.js/dojo_c.js";
+      dojoScript.onload = async () => {
+        await wasm_bindgen();
+      };
 
-        document.body.appendChild(dojoScript);
+      document.body.appendChild(dojoScript);
 
-        // var starknetScript = document.createElement("script");
-        // starknetScript.src = "TemplateData/starknet-5.24.3.js";
-        // document.body.appendChild(starknetScript);
-      });
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+      // var starknetScript = document.createElement("script");
+      // starknetScript.src = "TemplateData/starknet-5.24.3.js";
+      // document.body.appendChild(starknetScript);
+    });
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

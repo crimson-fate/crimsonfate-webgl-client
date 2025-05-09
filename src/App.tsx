@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useUnityContext, Unity } from "react-unity-webgl";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 
 import { Event } from "./constants/events";
@@ -132,7 +132,7 @@ function App() {
             }
 
             if (calldata.key) {
-              calldata.key = []
+              calldata.key = [];
             }
 
             if (calldata.saltNonce) {
@@ -236,7 +236,35 @@ function App() {
       removeEventListener(Event.ExecuteAction, handleSendTransaction);
     };
   }, [addEventListener, removeEventListener, handleSendTransaction]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+    const updateSize = () => {
+      const container = containerRef.current;
+
+      if (container) {
+        container.style.height = `${window.innerHeight}px`;
+        container.style.width = `${window.innerWidth}px`;
+      }
+
+      const canvas = document.getElementById("game-unity");
+      if (canvas) {
+        canvas.style.width = window.innerWidth + "px";
+        canvas.style.height = window.innerHeight + "px";
+      }
+    };
+
+    updateSize();
+
+    window.addEventListener("resize", updateSize);
+    window.addEventListener("orientationchange", () =>
+      setTimeout(updateSize, 300)
+    );
+
+    return () => {
+      window.removeEventListener("resize", updateSize);
+    };
+  }, []);
   return (
     <div
       className="container"
@@ -266,12 +294,33 @@ function App() {
           </div>
         </>
       )}
-      <Unity
-        className="unity"
-        unityProvider={unityProvider}
-        style={{ width: "100vw", height: "100vh", overflow: "hidden" }}
-        devicePixelRatio={devicePixelRatio}
-      />
+      <div
+        ref={containerRef}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          overflow: "hidden",
+          paddingTop: "env(safe-area-inset-top)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+          WebkitOverflowScrolling: "touch",
+          touchAction: "auto",
+          zIndex: 0,
+        }}
+      >
+        <Unity
+          id="game-unity"
+          unityProvider={unityProvider}
+          devicePixelRatio={devicePixelRatio}
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "block",
+          }}
+        />
+      </div>
     </div>
   );
 }
