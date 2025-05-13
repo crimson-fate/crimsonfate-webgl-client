@@ -237,7 +237,7 @@ function App() {
     };
   }, [addEventListener, removeEventListener, handleSendTransaction]);
   const containerRef = useRef<HTMLDivElement | null>(null);
-
+  const BASE_DEVICE_SIZE_RATIO = 9/16;
   useEffect(() => {
     const updateSize = () => {
       const container = containerRef.current;
@@ -249,8 +249,13 @@ function App() {
 
       const canvas = document.getElementById("game-unity");
       if (canvas) {
-        canvas.style.width = window.innerWidth + "px";
-        canvas.style.height = window.innerHeight + "px";
+        if (window.innerWidth < window.innerHeight * BASE_DEVICE_SIZE_RATIO) {
+          canvas.style.width = window.innerWidth + "px";
+          canvas.style.height = window.innerHeight + "px";
+        } else {
+          canvas.style.width = window.innerHeight * BASE_DEVICE_SIZE_RATIO + "px";
+          canvas.style.height = window.innerHeight + "px";
+        }
       }
     };
 
@@ -307,6 +312,11 @@ function App() {
           paddingBottom: "env(safe-area-inset-bottom)",
           WebkitOverflowScrolling: "touch",
           touchAction: "auto",
+          backgroundColor: "black",
+          alignItems: "center",
+          alignContent: "center",
+          justifyContent: "center",
+          display: "flex",
           zIndex: 0,
         }}
       >
