@@ -249,13 +249,8 @@ function App() {
 
       const canvas = document.getElementById("game-unity");
       if (canvas) {
-        if (window.innerWidth < window.innerHeight * BASE_DEVICE_SIZE_RATIO) {
-          canvas.style.width = window.innerWidth + "px";
-          canvas.style.height = window.innerHeight + "px";
-        } else {
-          canvas.style.width = window.innerHeight * BASE_DEVICE_SIZE_RATIO + "px";
-          canvas.style.height = window.innerHeight + "px";
-        }
+        canvas.style.width = window.innerHeight + "px";
+        canvas.style.height = window.innerHeight + "px";
       }
     };
 
