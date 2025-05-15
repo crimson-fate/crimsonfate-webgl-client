@@ -64,6 +64,7 @@ const connector = [
   new ControllerConnector({
     policies,
     defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
+
     chains: [
       {
         rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia",

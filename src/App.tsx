@@ -237,34 +237,34 @@ function App() {
     };
   }, [addEventListener, removeEventListener, handleSendTransaction]);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const BASE_DEVICE_SIZE_RATIO = 9/16;
-  useEffect(() => {
-    const updateSize = () => {
-      const container = containerRef.current;
+  // const BASE_DEVICE_SIZE_RATIO = 9 / 16;
+  // useEffect(() => {
+  //   const updateSize = () => {
+  //     const container = containerRef.current;
 
-      if (container) {
-        container.style.height = `${window.innerHeight}px`;
-        container.style.width = `${window.innerWidth}px`;
-      }
+  //     if (container) {
+  //       container.style.height = `${window.innerHeight}px`;
+  //       container.style.width = `${window.innerWidth}px`;
+  //     }
 
-      const canvas = document.getElementById("game-unity");
-      if (canvas) {
-        canvas.style.width = window.innerHeight + "px";
-        canvas.style.height = window.innerHeight + "px";
-      }
-    };
+  //     const canvas = document.getElementById("game-unity");
+  //     if (canvas) {
+  //       canvas.style.width = window.innerHeight + "px";
+  //       canvas.style.height = window.innerHeight + "px";
+  //     }
+  //   };
 
-    updateSize();
+  //   updateSize();
 
-    window.addEventListener("resize", updateSize);
-    window.addEventListener("orientationchange", () =>
-      setTimeout(updateSize, 300)
-    );
+  //   window.addEventListener("resize", updateSize);
+  //   window.addEventListener("orientationchange", () =>
+  //     setTimeout(updateSize, 300)
+  //   );
 
-    return () => {
-      window.removeEventListener("resize", updateSize);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("resize", updateSize);
+  //   };
+  // }, []);
   return (
     <div
       className="container"
