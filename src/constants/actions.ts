@@ -6,6 +6,10 @@ export enum Action {
     receive_angel_or_evil = 'receive_angel_or_evil',
     accept_or_ignore_evil_skill = 'accept_or_ignore_evil_skill',
     update_prover = 'update_prover',
+    request_valor = 'request_valor',
+    bribe_valor = 'bribe_valor',
+    claim_chest = 'claim_chest',
+    open_chest = 'open_chest',
 };
 
 export const Callback = {

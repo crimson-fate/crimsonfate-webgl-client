@@ -149,7 +149,9 @@ function App() {
             entrypoint === Action.receive_skill ||
             entrypoint === Action.receive_angel_or_evil ||
             entrypoint === Action.start_new_game ||
-            entrypoint === Action.accept_or_ignore_evil_skill
+            entrypoint === Action.accept_or_ignore_evil_skill ||
+            entrypoint === Action.bribe_valor ||
+            entrypoint === Action.open_chest
           ) {
             result = await account.execute([
               {

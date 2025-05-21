@@ -45,6 +45,26 @@ const policies: SessionPolicies = {
           entrypoint: Action.update_prover,
           description: "Update prover",
         },
+        {
+          name: "Request valor",
+          entrypoint: Action.request_valor,
+          description: "Request valor",
+        },
+        {
+          name: "Bribe valor",
+          entrypoint: Action.bribe_valor,
+          description: "Bribe valor",
+        },
+        {
+          name: "Claim chest",
+          entrypoint: Action.claim_chest,
+          description: "Claim chest",
+        },
+        {
+          name: "Open chest",
+          entrypoint: Action.open_chest,
+          description: "Open chest",
+        },
       ],
     },
     ["0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f"]: {
