@@ -63,7 +63,7 @@ function App() {
         sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
       }
     });
-  }, [address, controller]);
+  }, [address, controller, requestConnected, sendMessage]);
 
   const [devicePixelRatio, setDevicePixelRatio] = useState(
     window.devicePixelRatio
@@ -85,22 +85,22 @@ function App() {
     [devicePixelRatio]
   );
 
-  const sendMessageToUnity = (id: number, data: any) => {
+  const sendMessageToUnity = useCallback((id: number, data: any) => {
     const json = JSON.stringify({
       id: id,
       data: data,
     });
     console.log("sendMessageToUnity", json);
     sendMessage(Callback.object, Callback.method, json);
-  };
+  }, [sendMessage]);
 
   const handleSendTransaction = useCallback(
     (unityData: any) => {
-      const sendTransaction = async (data: any) => {
+      const sendTransaction = async (unityData: any) => {
         if (!account) return;
 
         unityData = JSON.parse(unityData);
-        var data = unityData.data;
+        let data = unityData.data;
         data = JSON.parse(data);
         // if data.calldata is Array(0) then data.calldata = []
         if (data.calldata === "Array(0)") {
@@ -195,10 +195,10 @@ function App() {
       };
       sendTransaction(unityData);
     },
-    [account]
+    [account, sendMessageToUnity]
   );
 
-  const handleConnectWallet = () => {
+  const handleConnectWallet = useCallback(() => {
     setRequestConnected(true);
     connect({ connector: controller });
     console.log("handle connect wallet");
@@ -211,12 +211,12 @@ function App() {
       };
       sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
     }
-  };
+  }, [address, isConnected, connect, controller, sendMessage, username]);
 
-  const handleClearSessionButton = () => {
+  const handleClearSessionButton = useCallback(() => {
     disconnect();
     // window.location.reload();
-  };
+  }, [disconnect]);
 
   useEffect(() => {
     addEventListener(Event.ConnectWallet, handleConnectWallet);

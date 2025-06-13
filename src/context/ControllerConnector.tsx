@@ -1,4 +1,4 @@
-import { sepolia } from "@starknet-react/chains";
+import { mainnet } from "@starknet-react/chains";
 import {
   StarknetConfig,
   starkscan,
@@ -83,11 +83,11 @@ const policies: SessionPolicies = {
 const connector = [
   new ControllerConnector({
     policies,
-    defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
+    defaultChainId: constants.StarknetChainId.SN_MAIN,
 
     chains: [
       {
-        rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia",
+        rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet",
       },
     ],
   }),
@@ -110,7 +110,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
   return (
     <StarknetConfig
       autoConnect
-      chains={[sepolia]}
+      chains={[mainnet]}
       provider={publicProvider()}
       connectors={connector}
       explorer={starkscan}
