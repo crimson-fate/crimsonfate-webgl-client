@@ -11,7 +11,7 @@ import { CallData } from "starknet";
 import "./App.css";
 
 import RocketLoader from "./components/RocketLoader";
-
+import SEO from "./components/Seo";
 function App() {
   const handleCacheControl = (url: string) => {
     if (url.match(/\.data/) || url.match(/\.bundle/)) {
@@ -85,14 +85,17 @@ function App() {
     [devicePixelRatio]
   );
 
-  const sendMessageToUnity = useCallback((id: number, data: any) => {
-    const json = JSON.stringify({
-      id: id,
-      data: data,
-    });
-    console.log("sendMessageToUnity", json);
-    sendMessage(Callback.object, Callback.method, json);
-  }, [sendMessage]);
+  const sendMessageToUnity = useCallback(
+    (id: number, data: any) => {
+      const json = JSON.stringify({
+        id: id,
+        data: data,
+      });
+      console.log("sendMessageToUnity", json);
+      sendMessage(Callback.object, Callback.method, json);
+    },
+    [sendMessage]
+  );
 
   const handleSendTransaction = useCallback(
     (unityData: any) => {
@@ -239,96 +242,78 @@ function App() {
     };
   }, [addEventListener, removeEventListener, handleSendTransaction]);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  // const BASE_DEVICE_SIZE_RATIO = 9 / 16;
-  // useEffect(() => {
-  //   const updateSize = () => {
-  //     const container = containerRef.current;
 
-  //     if (container) {
-  //       container.style.height = `${window.innerHeight}px`;
-  //       container.style.width = `${window.innerWidth}px`;
-  //     }
-
-  //     const canvas = document.getElementById("game-unity");
-  //     if (canvas) {
-  //       canvas.style.width = window.innerHeight + "px";
-  //       canvas.style.height = window.innerHeight + "px";
-  //     }
-  //   };
-
-  //   updateSize();
-
-  //   window.addEventListener("resize", updateSize);
-  //   window.addEventListener("orientationchange", () =>
-  //     setTimeout(updateSize, 300)
-  //   );
-
-  //   return () => {
-  //     window.removeEventListener("resize", updateSize);
-  //   };
-  // }, []);
   return (
-    <div
-      className="container"
-      style={{
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-        backgroundColor: "white",
-      }}
-    >
-      {isLoaded === false && (
-        <>
-          <button
-            className="floating-button"
-            onClick={() => disconnect()}
-            style={{ fontFamily: "FredokaOne" }}
-          >
-            Disconnect
-          </button>
-          <RocketLoader />
-          <div className="progress-container">
-            <div
-              className="progress-bar"
-              style={{ width: `${loadingPercentage}%` }}
-            />
-            <span className="progress-label">{loadingPercentage}%</span>
-          </div>
-        </>
-      )}
+    <>
+      <SEO
+        title="Crimsonfate"
+        description="Onchain Game In Starknet"
+        image={"https://crimsonfate.starkarcade.com/banner.png"}
+        siteName="Crimsonfate"
+        url="https://crimsonfate.starkarcade.com"
+      />
       <div
-        ref={containerRef}
+        className="container"
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
           width: "100vw",
           height: "100vh",
           overflow: "hidden",
-          paddingTop: "env(safe-area-inset-top)",
-          paddingBottom: "env(safe-area-inset-bottom)",
-          WebkitOverflowScrolling: "touch",
-          touchAction: "auto",
-          backgroundColor: "black",
-          alignItems: "center",
-          alignContent: "center",
-          justifyContent: "center",
-          display: "flex",
-          zIndex: 0,
+          backgroundColor: "white",
         }}
       >
-        <Unity
-          id="game-unity"
-          unityProvider={unityProvider}
-          devicePixelRatio={devicePixelRatio}
+        {isLoaded === false && (
+          <>
+            <button
+              className="floating-button"
+              onClick={() => disconnect()}
+              style={{ fontFamily: "FredokaOne" }}
+            >
+              Disconnect
+            </button>
+            <RocketLoader />
+            <div className="progress-container">
+              <div
+                className="progress-bar"
+                style={{ width: `${loadingPercentage}%` }}
+              />
+              <span className="progress-label">{loadingPercentage}%</span>
+            </div>
+          </>
+        )}
+        <div
+          ref={containerRef}
           style={{
-            width: "100%",
-            height: "100%",
-            display: "block",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            overflow: "hidden",
+            paddingTop: "env(safe-area-inset-top)",
+            paddingBottom: "env(safe-area-inset-bottom)",
+            WebkitOverflowScrolling: "touch",
+            touchAction: "auto",
+            backgroundColor: "black",
+            alignItems: "center",
+            alignContent: "center",
+            justifyContent: "center",
+            display: "flex",
+            zIndex: 0,
           }}
-        />
+        >
+          <Unity
+            id="game-unity"
+            unityProvider={unityProvider}
+            devicePixelRatio={devicePixelRatio}
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "block",
+            }}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 export default App;
