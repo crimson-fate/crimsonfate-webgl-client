@@ -5,7 +5,7 @@ import { VitePWA, type VitePWAOptions } from "vite-plugin-pwa";
 
 const manifestForPlugIn: Partial<VitePWAOptions> = {
   registerType: "prompt",
-  // includeAssests: ["favicon.ico", "apple-touc-icon.png", "masked-icon.svg"],
+
   workbox: {
     maximumFileSizeToCacheInBytes: 25 * 1024 * 1024,
   },

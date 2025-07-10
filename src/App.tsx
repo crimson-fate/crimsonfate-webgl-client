@@ -293,7 +293,6 @@ function App() {
             paddingBottom: "env(safe-area-inset-bottom)",
             WebkitOverflowScrolling: "touch",
             touchAction: "auto",
-            backgroundColor: "black",
             alignItems: "center",
             alignContent: "center",
             justifyContent: "center",
