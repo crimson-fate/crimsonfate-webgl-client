@@ -1,3 +1,5 @@
+import config from "../config";
+
 export enum Action {
     request_random = 'request_random',
     start_new_game = 'start_new_game',
@@ -10,6 +12,7 @@ export enum Action {
     bribe_valor = 'bribe_valor',
     claim_chest = 'claim_chest',
     open_chest = 'open_chest',
+    claim_gem = 'claim_gem',
 };
 
 export const Callback = {
@@ -25,4 +28,11 @@ export const actionConfig = {
     [Action.receive_skill]: {
         waitForTx: true,
     },
+};
+
+export const getActionAddress = (action: Action) => {
+  if (action === Action.claim_gem) {
+    return config().gemAddress;
+  }
+  else return config().actionAddress;
 };

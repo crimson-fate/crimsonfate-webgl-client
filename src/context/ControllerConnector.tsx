@@ -67,6 +67,15 @@ const policies: SessionPolicies = {
         },
       ],
     },
+    [config().gemAddress]: {
+      methods: [
+        {
+          name: "Claim gem",
+          entrypoint: Action.claim_gem,
+          description: "Claim gem",
+        },
+      ]
+    },
     ["0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f"]: {
       methods: [
         {
@@ -77,6 +86,28 @@ const policies: SessionPolicies = {
       ],
     },
   },
+  messages: [
+    {
+      name: "CrimsonFate Message Signing",
+      description: "Allows signing messages for in-game authentication",
+      types: {
+        StarknetDomain: [
+          { name: "name", type: "shortstring" },
+          { name: "version", type: "shortstring" },
+          { name: "chainId", type: "shortstring" },
+          { name: "revision", type: "shortstring" }
+        ],
+        Message: [{ name: 'nonce', type: 'selector' }],
+      },
+      primaryType: "Message",
+      domain: {
+        name: "CrimsonFate",
+        version: "1",
+        revision: "1",
+        chainId: "SN_MAIN",
+      }
+    }
+  ]
 };
 
 // Initialize the connector
