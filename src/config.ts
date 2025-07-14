@@ -1,5 +1,5 @@
 export default () => ({
-  actionAddress: '0x543fb4dad1cbd9c6c5a6b6cdf17d283f1ab92d0e22344dd42423ef42796166b',
-  gemAddress: '0x4cd35cefc9018420faeadbeef19bdb3f9c7cd164f13c6e365f7b240ca91e1fc',
+  actionAddress: '0x5ef1617af662856daa301a4e86322e799da3ee63e27ef11c3bccd98a56ac47f',
+  gemAddress: '0x2fa568ef4900cf32fb41b5caf87beb63e6838ebaafa78cf44eea6bfcbb1bd54',
   VRF_PROVIDER_ADDRESS: '0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f',
 });
