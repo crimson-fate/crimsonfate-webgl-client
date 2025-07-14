@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 
 import { Event } from "./constants/events";
-import { Action, Callback } from "./constants/actions";
+import { Action, Callback, getActionAddress } from "./constants/actions";
 import config from "./config";
 import { CallData } from "starknet";
 import "./App.css";
@@ -43,7 +43,7 @@ function App() {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
-  const controller = connectors[0] as ControllerConnector;
+  const connector = connectors[0] as ControllerConnector;
   const [username, setUsername] = useState<string>();
   const [requestConnected, setRequestConnected] = useState<boolean>(false);
 
@@ -51,7 +51,7 @@ function App() {
 
   useEffect(() => {
     if (!address) return;
-    controller.username()?.then((n) => {
+    connector.username()?.then((n) => {
       setUsername(n);
       const json = {
         address: address,
@@ -63,7 +63,7 @@ function App() {
         sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
       }
     });
-  }, [address, controller, requestConnected, sendMessage]);
+  }, [address, connector, requestConnected, sendMessage]);
 
   const [devicePixelRatio, setDevicePixelRatio] = useState(
     window.devicePixelRatio
@@ -134,12 +134,23 @@ function App() {
               calldata.point = JSON.parse(calldata.point);
             }
 
-            if (calldata.key) {
-              calldata.key = [];
+            if (typeof calldata.saltNonce === "string") {
+              calldata.saltNonce = parseInt(calldata.saltNonce, 10);
             }
 
-            if (calldata.saltNonce) {
+            if (calldata.saltNonce === 123 || calldata.saltNonce === 1234) {
               calldata.saltNonce = new Date().getTime();
+            }
+
+            if (typeof calldata.key === "string") {
+              try {
+                calldata.key = JSON.parse(calldata.key);
+                if (calldata.key[0] === "1") {
+                  calldata.key = ["123", "456"];
+                }
+              } catch {
+                calldata.key = ["123", "456"];
+              }
             }
           } catch (err) {
             console.error("Failed to parse calldata", err);
@@ -156,17 +167,18 @@ function App() {
             entrypoint === Action.bribe_valor ||
             entrypoint === Action.open_chest
           ) {
+            console.log("Requesting random number for entrypoint", entrypoint);
             result = await account.execute([
               {
                 contractAddress: config().VRF_PROVIDER_ADDRESS,
                 entrypoint: Action.request_random,
                 calldata: CallData.compile({
-                  caller: config().actionAddress,
+                  caller: getActionAddress(entrypoint),
                   source: { type: 0, address: account.address },
                 }),
               },
               {
-                contractAddress: config().actionAddress,
+                contractAddress: getActionAddress(entrypoint),
                 entrypoint: entrypoint,
                 calldata: CallData.compile(calldata),
               },
@@ -174,7 +186,7 @@ function App() {
           } else {
             result = await account.execute([
               {
-                contractAddress: config().actionAddress,
+                contractAddress: getActionAddress(entrypoint),
                 entrypoint: entrypoint,
                 calldata: CallData.compile(calldata),
               },
@@ -201,25 +213,60 @@ function App() {
     [account, sendMessageToUnity]
   );
 
+  const handleSignMessage = useCallback(
+    (unityData: any) => {
+      const signMessage = async (unityData: any) => {
+        if (!account) return;
+
+        unityData = JSON.parse(unityData);
+        let data = unityData.data;
+        data = JSON.parse(data);
+        console.log("handleSignMessage", data);
+
+        try {
+          const result = await account.signMessage(data);
+          const jsonString = JSON.stringify(result);
+          console.log("Signature:", jsonString);
+          sendMessageToUnity(unityData.id, jsonString);
+        } catch (e) {
+          sendMessageToUnity(unityData.id, String(e));
+        }
+      };
+      signMessage(unityData);
+    },
+    [account, sendMessageToUnity]
+  );
+
   const handleConnectWallet = useCallback(() => {
     setRequestConnected(true);
-    connect({ connector: controller });
+    connect({ connector: connector });
     console.log("handle connect wallet");
     if (address && isConnected) {
       console.log("address", address);
-      controller.username()?.then((n) => setUsername(n));
-      const json = {
-        address: address,
-        username: username,
-      };
-      sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
+      connector.username()?.then((n) => setUsername(n));
+      // const json = {
+      //   address: address,
+      //   username: username,
+      // };
+      // sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
     }
-  }, [address, isConnected, connect, controller, sendMessage, username]);
+  }, [address, isConnected, connect, connector, sendMessage, username]);
 
   const handleClearSessionButton = useCallback(() => {
     disconnect();
     // window.location.reload();
   }, [disconnect]);
+
+  const handleOpenProfile = useCallback(
+    () => {
+      if (!connector?.controller) {
+        console.error("Controller not initialized");
+        return;
+      }
+      connector.controller.openProfile("inventory");
+    },
+    [connector]
+  );
 
   useEffect(() => {
     addEventListener(Event.ConnectWallet, handleConnectWallet);
@@ -227,6 +274,13 @@ function App() {
       removeEventListener(Event.ConnectWallet, handleConnectWallet);
     };
   }, [addEventListener, removeEventListener, handleConnectWallet]);
+
+  useEffect(() => {
+    addEventListener(Event.OpenProfile, handleOpenProfile);
+    return () => {
+      removeEventListener(Event.OpenProfile, handleOpenProfile);
+    };
+  }, [addEventListener, removeEventListener, handleOpenProfile]);
 
   useEffect(() => {
     addEventListener(Event.Logout, handleClearSessionButton);
@@ -241,6 +295,13 @@ function App() {
       removeEventListener(Event.ExecuteAction, handleSendTransaction);
     };
   }, [addEventListener, removeEventListener, handleSendTransaction]);
+
+  useEffect(() => {
+    addEventListener(Event.SignMessage, handleSignMessage);
+    return () => {
+      removeEventListener(Event.SignMessage, handleSignMessage);
+    };
+  }, [addEventListener, removeEventListener, handleSignMessage]); 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   return (
