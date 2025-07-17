@@ -7,8 +7,9 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { Event } from "./constants/events";
 import { Action, Callback, getActionAddress } from "./constants/actions";
 import config from "./config";
-import { CallData } from "starknet";
+import { CallData, uint256 } from "starknet";
 import "./App.css";
+import {parseEther} from "ethers"
 
 import RocketLoader from "./components/RocketLoader";
 import SEO from "./components/Seo";
@@ -138,6 +139,12 @@ function App() {
               calldata.saltNonce = parseInt(calldata.saltNonce, 10);
             }
 
+            if (calldata.amount) {
+              console.log("calldata.amount", calldata.amount);
+              calldata.amount = uint256.bnToUint256(calldata.amount.low);
+              console.log("calldata.amount after", calldata.amount);
+            }
+
             if (calldata.saltNonce === 123 || calldata.saltNonce === 1234) {
               calldata.saltNonce = new Date().getTime();
             }
@@ -175,6 +182,28 @@ function App() {
                 calldata: CallData.compile({
                   caller: getActionAddress(entrypoint),
                   source: { type: 0, address: account.address },
+                }),
+              },
+              {
+                contractAddress: getActionAddress(entrypoint),
+                entrypoint: entrypoint,
+                calldata: CallData.compile(calldata),
+              },
+            ]);
+          } if (
+            entrypoint === Action.request_valor
+          ) {
+            console.log("Requesting valor for entrypoint", entrypoint);
+            // switch calldata.duration == 2 then set amount = 1000, 4 then 3000, 8 then 10000
+            const amount = calldata.duration === 2 ? 1000 : calldata.duration === 4 ? 3000 : 10000;
+            console.log("amount: ", amount);
+            result = await account.execute([
+              {
+                contractAddress: config().gemTokenContract, // gem token contract
+                entrypoint: 'approve',
+                calldata: CallData.compile({
+                  spender: '0x07b123e848c57f3200032d6bd992cecb9f33d62a906cb5b65c5dd8220bd6b27c', // vault contract
+                  amount: uint256.bnToUint256(parseEther(amount.toString())), // amount tùy theo duration 1000 | 3000 | 10000
                 }),
               },
               {

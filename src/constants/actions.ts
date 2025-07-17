@@ -13,6 +13,7 @@ export enum Action {
     claim_chest = 'claim_chest',
     open_chest = 'open_chest',
     claim_gem = 'claim_gem',
+    claim_gem_from_valor = 'claim_gem_from_valor',
 };
 
 export const Callback = {
