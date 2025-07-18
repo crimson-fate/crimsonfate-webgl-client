@@ -141,7 +141,7 @@ function App() {
 
             if (calldata.amount) {
               console.log("calldata.amount", calldata.amount);
-              calldata.amount = uint256.bnToUint256(parseEther(calldata.amount));
+              calldata.amount = uint256.bnToUint256(parseEther(calldata.amount.toString()));
               console.log("calldata.amount after", calldata.amount);
             }
 
