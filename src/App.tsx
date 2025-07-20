@@ -143,7 +143,16 @@ function App() {
 
             if (calldata.amount) {
               console.log("calldata.amount", calldata.amount);
-              calldata.amount = uint256.bnToUint256(parseEther(calldata.amount.toString()));
+              //uint256
+              // 5000
+              console.log("Type", typeof calldata.amount);
+              console.log("Data Parse Number", Number(calldata.amount));
+
+              const parseNumber = parseEther(
+                Number(calldata.amount).toString()
+              );
+
+              calldata.amount = uint256.bnToUint256(parseNumber);
               console.log("calldata.amount after", calldata.amount);
             }
 
