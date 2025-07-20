@@ -70,6 +70,11 @@ const policies: SessionPolicies = {
           entrypoint: Action.claim_gem_from_valor,
           description: "Claim gem from valor",
         },
+        {
+          name: "Revive",
+          entrypoint: Action.revive,
+          description: "Revive character",
+        },
       ],
     },
     [config().gemAddress]: {
@@ -78,6 +83,37 @@ const policies: SessionPolicies = {
           name: "Claim gem",
           entrypoint: Action.claim_gem,
           description: "Claim gem",
+        },
+      ]
+    },
+    [config().itemContractAddress]: {
+      name: "Item contract",
+      description: "Item contract for managing equipment and resources",
+      methods: [
+        {
+          name: "Claim new equipment",
+          entrypoint: Action.claim_new_equipments,
+          description: "Claim new equipment",
+        },
+        {
+          name: "Claim soul piece resources",
+          entrypoint: Action.claim_soul_piece_resources,
+          description: "Claim soul piece resources",
+        },
+        {
+          name: "Upgrade equipment",
+          entrypoint: Action.upgrade_equipment,
+          description: "Upgrade equipment",
+        },
+        {
+          name: "Reforge equipment",
+          entrypoint: Action.reforge_equipment,
+          description: "Reforge equipment",
+        },
+        {
+          name: "Merge equipment",
+          entrypoint: Action.merge_equipment,
+          description: "Merge equipment",
         },
       ]
     },
