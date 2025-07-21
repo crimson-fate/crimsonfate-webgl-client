@@ -12,8 +12,16 @@ export enum Action {
     bribe_valor = 'bribe_valor',
     claim_chest = 'claim_chest',
     open_chest = 'open_chest',
-    claim_gem = 'claim_gem',
     claim_gem_from_valor = 'claim_gem_from_valor',
+    revive = 'revive',
+    
+    claim_gem = 'claim_gem',
+
+    claim_new_equipments = 'claim_new_equipments',
+    claim_soul_piece_resources = 'claim_soul_piece_resources',
+    upgrade_equipment = 'upgrade_equipment',
+    reforge_equipment = 'reforge_equipment',
+    merge_equipment = 'merge_equipment',
 };
 
 export const Callback = {
@@ -34,6 +42,13 @@ export const actionConfig = {
 export const getActionAddress = (action: Action) => {
   if (action === Action.claim_gem) {
     return config().gemAddress;
-  }
-  else return config().actionAddress;
+  } else if (
+    action === Action.claim_new_equipments ||
+    action === Action.claim_soul_piece_resources ||
+    action === Action.upgrade_equipment ||
+    action === Action.reforge_equipment ||
+    action === Action.merge_equipment
+    ) {
+    return config().itemContractAddress;
+  } else return config().actionAddress;
 };

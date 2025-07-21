@@ -103,10 +103,12 @@ function App() {
       const sendTransaction = async (unityData: any) => {
         if (!account) return;
 
+        // unityData = {"entrypoint":"merge_equipment","calldata":"[\"L206696982908\",\"0x0000000000000000000000000000000000000000000000000000000000000002\",\"E2067298641641346\",\"E20672986416413827\",\"0x0000000000000000000000000000000000000000000000000000000000000001\",\"0x002850657263656e745f4174747269627574655f416464292841726d6f757229\",\"0x0000000000000000000000002847726561742928302928302928302928313029\",\"0x0000000000000000000000000000000000000000000000000000000000000014\"]"};
+        // let data = unityData;
+
         unityData = JSON.parse(unityData);
         let data = unityData.data;
         data = JSON.parse(data);
-        // if data.calldata is Array(0) then data.calldata = []
         if (data.calldata === "Array(0)") {
           data.calldata = [];
         }
@@ -173,6 +175,7 @@ function App() {
             calldata = [];
           }
           console.log("calldata", calldata);
+          console.log("compiled calldata", CallData.compile(calldata));
 
           let result = null;
           if (
@@ -232,7 +235,7 @@ function App() {
           }
 
           console.log("Transaction hash:", result.transaction_hash);
-          sendMessageToUnity(unityData.id, "");
+          sendMessageToUnity(unityData.id, "success");
         } catch (e) {
           sendMessageToUnity(unityData.id, String(e));
         } finally {
