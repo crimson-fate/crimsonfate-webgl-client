@@ -41,19 +41,15 @@ function App() {
   });
   const loadingPercentage = Math.round(loadingProgression * 100);
 
-  const { connect, connectors } = useConnect();
+  const { connectAsync, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const { address, isConnected } = useAccount();
-  const connector = connectors[0] as ControllerConnector;
-  const [username, setUsername] = useState<string>();
+  const { address, isConnected, account } = useAccount();
+  const controller = connectors[0] as ControllerConnector;
   const [requestConnected, setRequestConnected] = useState<boolean>(false);
-
-  const { account } = useAccount();
 
   useEffect(() => {
     if (!address) return;
-    connector.username()?.then((n) => {
-      setUsername(n);
+    controller.username()?.then((n) => {
       const json = {
         address: address,
         username: n,
@@ -64,7 +60,7 @@ function App() {
         sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
       }
     });
-  }, [address, connector, requestConnected, sendMessage]);
+  }, [address, controller, requestConnected, sendMessage]);
 
   const [devicePixelRatio, setDevicePixelRatio] = useState(
     window.devicePixelRatio
@@ -235,7 +231,12 @@ function App() {
           }
 
           console.log("Transaction hash:", result.transaction_hash);
-          sendMessageToUnity(unityData.id, "success");
+          sendMessageToUnity(unityData.id, JSON.stringify({
+            status: "success",
+            data: {
+              transaction_hash: result.transaction_hash,
+            }
+          }));
         } catch (e) {
           sendMessageToUnity(unityData.id, String(e));
         } finally {
@@ -257,7 +258,9 @@ function App() {
   const handleSignMessage = useCallback(
     (unityData: any) => {
       const signMessage = async (unityData: any) => {
-        if (!account) return;
+        if (!account) {
+          throw new Error("Account not initialized");
+        }
 
         unityData = JSON.parse(unityData);
         let data = unityData.data;
@@ -279,19 +282,24 @@ function App() {
   );
 
   const handleConnectWallet = useCallback(() => {
-    setRequestConnected(true);
-    connect({ connector: connector });
-    console.log("handle connect wallet");
-    if (address && isConnected) {
-      console.log("address", address);
-      connector.username()?.then((n) => setUsername(n));
-      // const json = {
-      //   address: address,
-      //   username: username,
-      // };
-      // sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
+    const connect = async () => {
+      setRequestConnected(true);
+      await connectAsync({ connector: controller });
+      console.log("handle connect wallet");
+      if (!account) {
+        console.error("Account not initialized");
+      }
+      if (address && isConnected) {
+        console.log("address", address);
+        // const json = {
+        //   address: address,
+        //   username: username,
+        // };
+        // sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
+      }
     }
-  }, [address, isConnected, connect, connector, sendMessage, username]);
+    connect();
+  }, [connectAsync, controller, account, address, isConnected]);
 
   const handleClearSessionButton = useCallback(() => {
     disconnect();
@@ -300,13 +308,13 @@ function App() {
 
   const handleOpenProfile = useCallback(
     () => {
-      if (!connector?.controller) {
+      if (!controller?.controller) {
         console.error("Controller not initialized");
         return;
       }
-      connector.controller.openProfile("inventory");
+      controller.controller.openProfile("inventory");
     },
-    [connector]
+    [controller]
   );
 
   useEffect(() => {
