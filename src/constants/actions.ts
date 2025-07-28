@@ -22,6 +22,8 @@ export enum Action {
     upgrade_equipment = 'upgrade_equipment',
     reforge_equipment = 'reforge_equipment',
     merge_equipment = 'merge_equipment',
+
+    progress_task = 'progress_task',
 };
 
 export const Callback = {
@@ -42,6 +44,10 @@ export const actionConfig = {
 export const getActionAddress = (action: Action) => {
   if (action === Action.claim_gem) {
     return config().gemAddress;
+  } else if (
+    action === Action.progress_task
+  ) {
+    return config().achievementContractAddress;
   } else if (
     action === Action.claim_new_equipments ||
     action === Action.claim_soul_piece_resources ||

@@ -117,6 +117,17 @@ const policies: SessionPolicies = {
         },
       ]
     },
+    [config().achievementContractAddress]: {
+      name: "Achievement contract",
+      description: "Contract for managing achievements and tasks",
+      methods: [
+        {
+          name: "Progress task",
+          entrypoint: Action.progress_task,
+          description: "Progress task",
+        },
+      ]
+    },
     [config().gemTokenContract]: {
       name: "Gem contract",
       description: "Gem token",
