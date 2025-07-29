@@ -7,8 +7,9 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { Event } from "./constants/events";
 import { Action, Callback, getActionAddress } from "./constants/actions";
 import config from "./config";
-import { CallData } from "starknet";
+import { CallData, uint256 } from "starknet";
 import "./App.css";
+import {parseEther} from "ethers"
 
 import RocketLoader from "./components/RocketLoader";
 import SEO from "./components/Seo";
@@ -40,19 +41,16 @@ function App() {
   });
   const loadingPercentage = Math.round(loadingProgression * 100);
 
-  const { connect, connectors } = useConnect();
+  const { connectAsync, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const { address, isConnected } = useAccount();
-  const connector = connectors[0] as ControllerConnector;
-  const [username, setUsername] = useState<string>();
+  const { address, isConnected, account } = useAccount();
+  const controller = connectors[0] as ControllerConnector;
   const [requestConnected, setRequestConnected] = useState<boolean>(false);
-
-  const { account } = useAccount();
+  const [transactionInput, setTransactionInput] = useState<string>("");
 
   useEffect(() => {
     if (!address) return;
-    connector.username()?.then((n) => {
-      setUsername(n);
+    controller.username()?.then((n) => {
       const json = {
         address: address,
         username: n,
@@ -63,7 +61,7 @@ function App() {
         sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
       }
     });
-  }, [address, connector, requestConnected, sendMessage]);
+  }, [address, controller, requestConnected, sendMessage]);
 
   const [devicePixelRatio, setDevicePixelRatio] = useState(
     window.devicePixelRatio
@@ -102,10 +100,12 @@ function App() {
       const sendTransaction = async (unityData: any) => {
         if (!account) return;
 
+        // unityData = {"entrypoint":"merge_equipment","calldata":"[\"L206696982908\",\"0x0000000000000000000000000000000000000000000000000000000000000002\",\"E2067298641641346\",\"E20672986416413827\",\"0x0000000000000000000000000000000000000000000000000000000000000001\",\"0x002850657263656e745f4174747269627574655f416464292841726d6f757229\",\"0x0000000000000000000000002847726561742928302928302928302928313029\",\"0x0000000000000000000000000000000000000000000000000000000000000014\"]"};
+        // let data = unityData;
+
         unityData = JSON.parse(unityData);
         let data = unityData.data;
         data = JSON.parse(data);
-        // if data.calldata is Array(0) then data.calldata = []
         if (data.calldata === "Array(0)") {
           data.calldata = [];
         }
@@ -138,6 +138,21 @@ function App() {
               calldata.saltNonce = parseInt(calldata.saltNonce, 10);
             }
 
+            if (calldata.amount) {
+              console.log("calldata.amount", calldata.amount);
+              //uint256
+              // 5000
+              console.log("Type", typeof calldata.amount);
+              console.log("Data Parse Number", Number(calldata.amount));
+
+              const parseNumber = parseEther(
+                Number(calldata.amount).toString()
+              );
+
+              calldata.amount = uint256.bnToUint256(parseNumber);
+              console.log("calldata.amount after", calldata.amount);
+            }
+
             if (calldata.saltNonce === 123 || calldata.saltNonce === 1234) {
               calldata.saltNonce = new Date().getTime();
             }
@@ -157,6 +172,7 @@ function App() {
             calldata = [];
           }
           console.log("calldata", calldata);
+          console.log("compiled calldata", CallData.compile(calldata));
 
           let result = null;
           if (
@@ -183,6 +199,48 @@ function App() {
                 calldata: CallData.compile(calldata),
               },
             ]);
+          } if (
+            entrypoint === Action.request_valor
+          ) {
+            console.log("Requesting valor for entrypoint", entrypoint);
+            // switch calldata.duration == 2 then set amount = 1000, 4 then 3000, 8 then 10000
+            const amount = calldata.duration === 2 ? 1000 : calldata.duration === 4 ? 3000 : 10000;
+            console.log("amount: ", amount);
+            result = await account.execute([
+              {
+                contractAddress: config().gemTokenContract, // gem token contract
+                entrypoint: 'approve',
+                calldata: CallData.compile({
+                  spender: '0x07b123e848c57f3200032d6bd992cecb9f33d62a906cb5b65c5dd8220bd6b27c', // vault contract
+                  amount: uint256.bnToUint256(parseEther(amount.toString())), // amount tùy theo duration 1000 | 3000 | 10000
+                }),
+              },
+              {
+                contractAddress: getActionAddress(entrypoint),
+                entrypoint: entrypoint,
+                calldata: CallData.compile(calldata),
+              },
+            ]);
+          } else if (
+            entrypoint === Action.multicall
+          ) {
+            console.log("Executing multicall for entrypoint", entrypoint);
+            // log calldata for each call
+            for (const call of calldata) {
+              console.log("Multicall entrypoint:", call.entrypoint);
+              console.log("Multicall calldata:", call.calldata);
+              call.calldata = JSON.parse(call.calldata);
+              call.contractAddress = getActionAddress(call.entrypoint);
+              console.log("Multicall contractAddress:", call.contractAddress);
+            }
+
+            result = await account.execute(
+              calldata.map((call: any) => ({
+                contractAddress: call.contractAddress,
+                entrypoint: call.entrypoint,
+                calldata: CallData.compile(call.calldata),
+              }))
+            );
           } else {
             result = await account.execute([
               {
@@ -194,7 +252,12 @@ function App() {
           }
 
           console.log("Transaction hash:", result.transaction_hash);
-          sendMessageToUnity(unityData.id, "");
+          sendMessageToUnity(unityData.id, JSON.stringify({
+            status: "success",
+            data: {
+              transaction_hash: result.transaction_hash,
+            }
+          }));
         } catch (e) {
           sendMessageToUnity(unityData.id, String(e));
         } finally {
@@ -216,7 +279,9 @@ function App() {
   const handleSignMessage = useCallback(
     (unityData: any) => {
       const signMessage = async (unityData: any) => {
-        if (!account) return;
+        if (!account) {
+          throw new Error("Account not initialized");
+        }
 
         unityData = JSON.parse(unityData);
         let data = unityData.data;
@@ -237,20 +302,45 @@ function App() {
     [account, sendMessageToUnity]
   );
 
-  const handleConnectWallet = useCallback(() => {
-    setRequestConnected(true);
-    connect({ connector: connector });
-    console.log("handle connect wallet");
-    if (address && isConnected) {
-      console.log("address", address);
-      connector.username()?.then((n) => setUsername(n));
-      // const json = {
-      //   address: address,
-      //   username: username,
-      // };
-      // sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
+  const handleManualTransaction = useCallback(() => {
+    if (!transactionInput.trim()) {
+      alert("Please enter transaction data");
+      return;
     }
-  }, [address, isConnected, connect, connector, sendMessage, username]);
+    
+    try {
+      // Create a mock Unity data object with the input
+      const mockUnityData = {
+        id: Date.now(), // Use timestamp as ID
+        data: transactionInput
+      };
+      
+      handleSendTransaction(JSON.stringify(mockUnityData));
+    } catch (e) {
+      console.error("Error sending manual transaction:", e);
+      alert("Error: Invalid transaction data format");
+    }
+  }, [transactionInput, handleSendTransaction]);
+
+  const handleConnectWallet = useCallback(() => {
+    const connect = async () => {
+      setRequestConnected(true);
+      await connectAsync({ connector: controller });
+      console.log("handle connect wallet");
+      if (!account) {
+        console.error("Account not initialized");
+      }
+      if (address && isConnected) {
+        console.log("address", address);
+        // const json = {
+        //   address: address,
+        //   username: username,
+        // };
+        // sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
+      }
+    }
+    connect();
+  }, [connectAsync, controller, account, address, isConnected]);
 
   const handleClearSessionButton = useCallback(() => {
     disconnect();
@@ -259,13 +349,13 @@ function App() {
 
   const handleOpenProfile = useCallback(
     () => {
-      if (!connector?.controller) {
+      if (!controller?.controller) {
         console.error("Controller not initialized");
         return;
       }
-      connector.controller.openProfile("inventory");
+      controller.controller.openProfile("inventory");
     },
-    [connector]
+    [controller]
   );
 
   useEffect(() => {
@@ -372,6 +462,103 @@ function App() {
             }}
           />
         </div>
+        
+        {/* Manual Transaction Input - Only show when game is loaded */}
+        {/* {isLoaded && (
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              zIndex: 1000,
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              padding: "15px",
+              borderRadius: "8px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              minWidth: "300px",
+            }}
+          >
+            {!account ? (
+              <>
+                <button
+                  onClick={handleConnectWallet}
+                  style={{
+                    padding: "12px 16px",
+                    backgroundColor: "#2196F3",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontFamily: "FredokaOne",
+                    fontSize: "14px",
+                  }}
+                >
+                  Connect Wallet
+                </button>
+                <small style={{ color: "#ccc", fontSize: "10px" }}>
+                  Connect your wallet to send transactions
+                </small>
+              </>
+            ) : (
+              <>
+                <div style={{ color: "#4CAF50", fontSize: "12px", fontWeight: "bold" }}>
+                  Wallet Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
+                </div>
+                <textarea
+                  value={transactionInput}
+                  onChange={(e) => setTransactionInput(e.target.value)}
+                  placeholder='Enter transaction data (JSON format)&#10;Example:&#10;{"entrypoint":"merge_equipment","calldata":"[...]"}'
+                  style={{
+                    width: "100%",
+                    height: "80px",
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    fontSize: "12px",
+                    fontFamily: "monospace",
+                    resize: "vertical",
+                  }}
+                />
+                <button
+                  onClick={handleManualTransaction}
+                  disabled={!transactionInput.trim()}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: transactionInput.trim() ? "#4CAF50" : "#ccc",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: transactionInput.trim() ? "pointer" : "not-allowed",
+                    fontFamily: "FredokaOne",
+                    fontSize: "14px",
+                  }}
+                >
+                  Send Transaction
+                </button>
+                <button
+                  onClick={() => disconnect()}
+                  style={{
+                    padding: "6px 12px",
+                    backgroundColor: "#f44336",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontFamily: "FredokaOne",
+                    fontSize: "12px",
+                  }}
+                >
+                  Disconnect
+                </button>
+                <small style={{ color: "#ccc", fontSize: "10px" }}>
+                  Enter valid JSON transaction data
+                </small>
+              </>
+            )}
+          </div>
+        )} */}
       </div>
     </>
   );
