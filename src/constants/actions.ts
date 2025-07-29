@@ -1,6 +1,8 @@
 import config from "../config";
 
 export enum Action {
+    multicall = 'multicall',
+
     request_random = 'request_random',
     start_new_game = 'start_new_game',
     receive_skill = 'receive_skill',

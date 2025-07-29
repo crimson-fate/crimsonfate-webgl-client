@@ -46,6 +46,7 @@ function App() {
   const { address, isConnected, account } = useAccount();
   const controller = connectors[0] as ControllerConnector;
   const [requestConnected, setRequestConnected] = useState<boolean>(false);
+  const [transactionInput, setTransactionInput] = useState<string>("");
 
   useEffect(() => {
     if (!address) return;
@@ -220,6 +221,26 @@ function App() {
                 calldata: CallData.compile(calldata),
               },
             ]);
+          } else if (
+            entrypoint === Action.multicall
+          ) {
+            console.log("Executing multicall for entrypoint", entrypoint);
+            // log calldata for each call
+            for (const call of calldata) {
+              console.log("Multicall entrypoint:", call.entrypoint);
+              console.log("Multicall calldata:", call.calldata);
+              call.calldata = JSON.parse(call.calldata);
+              call.contractAddress = getActionAddress(call.entrypoint);
+              console.log("Multicall contractAddress:", call.contractAddress);
+            }
+
+            result = await account.execute(
+              calldata.map((call: any) => ({
+                contractAddress: call.contractAddress,
+                entrypoint: call.entrypoint,
+                calldata: CallData.compile(call.calldata),
+              }))
+            );
           } else {
             result = await account.execute([
               {
@@ -280,6 +301,26 @@ function App() {
     },
     [account, sendMessageToUnity]
   );
+
+  const handleManualTransaction = useCallback(() => {
+    if (!transactionInput.trim()) {
+      alert("Please enter transaction data");
+      return;
+    }
+    
+    try {
+      // Create a mock Unity data object with the input
+      const mockUnityData = {
+        id: Date.now(), // Use timestamp as ID
+        data: transactionInput
+      };
+      
+      handleSendTransaction(JSON.stringify(mockUnityData));
+    } catch (e) {
+      console.error("Error sending manual transaction:", e);
+      alert("Error: Invalid transaction data format");
+    }
+  }, [transactionInput, handleSendTransaction]);
 
   const handleConnectWallet = useCallback(() => {
     const connect = async () => {
@@ -421,6 +462,103 @@ function App() {
             }}
           />
         </div>
+        
+        {/* Manual Transaction Input - Only show when game is loaded */}
+        {/* {isLoaded && (
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              zIndex: 1000,
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              padding: "15px",
+              borderRadius: "8px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              minWidth: "300px",
+            }}
+          >
+            {!account ? (
+              <>
+                <button
+                  onClick={handleConnectWallet}
+                  style={{
+                    padding: "12px 16px",
+                    backgroundColor: "#2196F3",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontFamily: "FredokaOne",
+                    fontSize: "14px",
+                  }}
+                >
+                  Connect Wallet
+                </button>
+                <small style={{ color: "#ccc", fontSize: "10px" }}>
+                  Connect your wallet to send transactions
+                </small>
+              </>
+            ) : (
+              <>
+                <div style={{ color: "#4CAF50", fontSize: "12px", fontWeight: "bold" }}>
+                  Wallet Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
+                </div>
+                <textarea
+                  value={transactionInput}
+                  onChange={(e) => setTransactionInput(e.target.value)}
+                  placeholder='Enter transaction data (JSON format)&#10;Example:&#10;{"entrypoint":"merge_equipment","calldata":"[...]"}'
+                  style={{
+                    width: "100%",
+                    height: "80px",
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    fontSize: "12px",
+                    fontFamily: "monospace",
+                    resize: "vertical",
+                  }}
+                />
+                <button
+                  onClick={handleManualTransaction}
+                  disabled={!transactionInput.trim()}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: transactionInput.trim() ? "#4CAF50" : "#ccc",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: transactionInput.trim() ? "pointer" : "not-allowed",
+                    fontFamily: "FredokaOne",
+                    fontSize: "14px",
+                  }}
+                >
+                  Send Transaction
+                </button>
+                <button
+                  onClick={() => disconnect()}
+                  style={{
+                    padding: "6px 12px",
+                    backgroundColor: "#f44336",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontFamily: "FredokaOne",
+                    fontSize: "12px",
+                  }}
+                >
+                  Disconnect
+                </button>
+                <small style={{ color: "#ccc", fontSize: "10px" }}>
+                  Enter valid JSON transaction data
+                </small>
+              </>
+            )}
+          </div>
+        )} */}
       </div>
     </>
   );
