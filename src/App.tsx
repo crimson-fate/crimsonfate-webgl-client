@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useUnityContext, Unity } from "react-unity-webgl";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
@@ -9,7 +10,7 @@ import { Action, Callback, getActionAddress } from "./constants/actions";
 import config from "./config";
 import { CallData, uint256 } from "starknet";
 import "./App.css";
-import {parseEther} from "ethers"
+import { parseEther } from "ethers";
 
 import RocketLoader from "./components/RocketLoader";
 import SEO from "./components/Seo";
@@ -199,19 +200,24 @@ function App() {
                 calldata: CallData.compile(calldata),
               },
             ]);
-          } if (
-            entrypoint === Action.request_valor
-          ) {
+          }
+          if (entrypoint === Action.request_valor) {
             console.log("Requesting valor for entrypoint", entrypoint);
             // switch calldata.duration == 2 then set amount = 1000, 4 then 3000, 8 then 10000
-            const amount = calldata.duration === 2 ? 1000 : calldata.duration === 4 ? 3000 : 10000;
+            const amount =
+              calldata.duration === 2
+                ? 1000
+                : calldata.duration === 4
+                ? 3000
+                : 10000;
             console.log("amount: ", amount);
             result = await account.execute([
               {
                 contractAddress: config().gemTokenContract, // gem token contract
-                entrypoint: 'approve',
+                entrypoint: "approve",
                 calldata: CallData.compile({
-                  spender: '0x07b123e848c57f3200032d6bd992cecb9f33d62a906cb5b65c5dd8220bd6b27c', // vault contract
+                  spender:
+                    "0x07b123e848c57f3200032d6bd992cecb9f33d62a906cb5b65c5dd8220bd6b27c", // vault contract
                   amount: uint256.bnToUint256(parseEther(amount.toString())), // amount tùy theo duration 1000 | 3000 | 10000
                 }),
               },
@@ -221,9 +227,7 @@ function App() {
                 calldata: CallData.compile(calldata),
               },
             ]);
-          } else if (
-            entrypoint === Action.multicall
-          ) {
+          } else if (entrypoint === Action.multicall) {
             console.log("Executing multicall for entrypoint", entrypoint);
             // log calldata for each call
             for (const call of calldata) {
@@ -252,12 +256,15 @@ function App() {
           }
 
           console.log("Transaction hash:", result.transaction_hash);
-          sendMessageToUnity(unityData.id, JSON.stringify({
-            status: "success",
-            data: {
-              transaction_hash: result.transaction_hash,
-            }
-          }));
+          sendMessageToUnity(
+            unityData.id,
+            JSON.stringify({
+              status: "success",
+              data: {
+                transaction_hash: result.transaction_hash,
+              },
+            })
+          );
         } catch (e) {
           sendMessageToUnity(unityData.id, String(e));
         } finally {
@@ -307,14 +314,14 @@ function App() {
       alert("Please enter transaction data");
       return;
     }
-    
+
     try {
       // Create a mock Unity data object with the input
       const mockUnityData = {
         id: Date.now(), // Use timestamp as ID
-        data: transactionInput
+        data: transactionInput,
       };
-      
+
       handleSendTransaction(JSON.stringify(mockUnityData));
     } catch (e) {
       console.error("Error sending manual transaction:", e);
@@ -338,7 +345,7 @@ function App() {
         // };
         // sendMessage("WalletManager", "SetWallet", JSON.stringify(json));
       }
-    }
+    };
     connect();
   }, [connectAsync, controller, account, address, isConnected]);
 
@@ -347,16 +354,13 @@ function App() {
     // window.location.reload();
   }, [disconnect]);
 
-  const handleOpenProfile = useCallback(
-    () => {
-      if (!controller?.controller) {
-        console.error("Controller not initialized");
-        return;
-      }
-      controller.controller.openProfile("inventory");
-    },
-    [controller]
-  );
+  const handleOpenProfile = useCallback(() => {
+    if (!controller?.controller) {
+      console.error("Controller not initialized");
+      return;
+    }
+    controller.controller.openProfile("inventory");
+  }, [controller]);
 
   useEffect(() => {
     addEventListener(Event.ConnectWallet, handleConnectWallet);
@@ -391,7 +395,7 @@ function App() {
     return () => {
       removeEventListener(Event.SignMessage, handleSignMessage);
     };
-  }, [addEventListener, removeEventListener, handleSignMessage]); 
+  }, [addEventListener, removeEventListener, handleSignMessage]);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   return (
@@ -462,7 +466,7 @@ function App() {
             }}
           />
         </div>
-        
+
         {/* Manual Transaction Input - Only show when game is loaded */}
         {/* {isLoaded && (
           <div
