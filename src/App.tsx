@@ -217,7 +217,7 @@ function App() {
                 entrypoint: "approve",
                 calldata: CallData.compile({
                   spender:
-                    "0x51dadd6a39086e39e9f7cb506f680e5e6b21d2cc522e3130fa9d54a83b72eae", // vault contract
+                    "0x4176ebccaf8ab8c0a9dd66df72e931fb6c553fa6e77435de45f18bb6fa6a2bb", // vault contract
                   amount: uint256.bnToUint256(parseEther(amount.toString())), // amount tùy theo duration 1000 | 3000 | 10000
                 }),
               },
@@ -255,11 +255,19 @@ function App() {
             ]);
           }
 
+          const txResult = await account.waitForTransaction(result.transaction_hash);
+          let txStatus = "failed";
+          if (txResult.isSuccess()) {
+            txStatus = "success";
+          }
+
           console.log("Transaction hash:", result.transaction_hash);
+          console.log("Transaction status:", txStatus);
+          console.log("Transaction result:", txResult);
           sendMessageToUnity(
             unityData.id,
             JSON.stringify({
-              status: "success",
+              status: txStatus,
               data: {
                 transaction_hash: result.transaction_hash,
               },
