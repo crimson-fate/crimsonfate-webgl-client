@@ -8,7 +8,7 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { Event } from "./constants/events";
 import { Action, Callback, getActionAddress } from "./constants/actions";
 import config from "./config";
-import { CallData, uint256 } from "starknet";
+import { CallData, RpcProvider, uint256 } from "starknet";
 import "./App.css";
 import { parseEther } from "ethers";
 
@@ -48,6 +48,10 @@ function App() {
   const controller = connectors[0] as ControllerConnector;
   const [requestConnected, setRequestConnected] = useState<boolean>(false);
   const [transactionInput, setTransactionInput] = useState<string>("");
+
+  const provider = new RpcProvider({
+      nodeUrl: "https://starknet-mainnet.public.blastapi.io/rpc/v0_8",
+    });
 
   useEffect(() => {
     if (!address) return;
@@ -255,15 +259,16 @@ function App() {
             ]);
           }
 
-          const txResult = await account.waitForTransaction(result.transaction_hash);
+          await provider.waitForTransaction(result.transaction_hash);
+          const txReceipt = await provider.getTransactionReceipt(result.transaction_hash);
           let txStatus = "failed";
-          if (txResult.isSuccess()) {
+          if (txReceipt.isSuccess()) {
             txStatus = "success";
           }
 
           console.log("Transaction hash:", result.transaction_hash);
           console.log("Transaction status:", txStatus);
-          console.log("Transaction result:", txResult);
+          console.log("Transaction result:", txReceipt);
           sendMessageToUnity(
             unityData.id,
             JSON.stringify({
