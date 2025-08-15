@@ -255,11 +255,19 @@ function App() {
             ]);
           }
 
+          const txResult = await account.waitForTransaction(result.transaction_hash);
+          let txStatus = "failed";
+          if (txResult.isSuccess()) {
+            txStatus = "success";
+          }
+
           console.log("Transaction hash:", result.transaction_hash);
+          console.log("Transaction status:", txStatus);
+          console.log("Transaction result:", txResult);
           sendMessageToUnity(
             unityData.id,
             JSON.stringify({
-              status: "success",
+              status: txStatus,
               data: {
                 transaction_hash: result.transaction_hash,
               },
