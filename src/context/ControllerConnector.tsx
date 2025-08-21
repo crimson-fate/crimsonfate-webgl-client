@@ -135,7 +135,7 @@ const policies: SessionPolicies = {
         {
           name: "Approve gem",
           description: "Approve a special amount of gem for game system contracts",
-          entrypoint: "battle_start"
+          entrypoint: "approve"
         },
       ]
     },
