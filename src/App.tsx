@@ -204,8 +204,7 @@ function App() {
                 calldata: CallData.compile(calldata),
               },
             ]);
-          }
-          if (entrypoint === Action.request_valor) {
+          } else if (entrypoint === Action.request_valor) {
             console.log("Requesting valor for entrypoint", entrypoint);
             // switch calldata.duration == 2 then set amount = 1000, 4 then 3000, 8 then 10000
             const amount =
