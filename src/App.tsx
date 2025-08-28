@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 
 import { Event } from "./constants/events";
-import { Action, Callback, getActionAddress } from "./constants/actions";
+import { Action, actionConfig, Callback, getActionAddress } from "./constants/actions";
 import config from "./config";
 import { CallData, RpcProvider, uint256 } from "starknet";
 import "./App.css";
@@ -258,16 +258,21 @@ function App() {
             ]);
           }
 
-          await provider.waitForTransaction(result.transaction_hash);
-          const txReceipt = await provider.getTransactionReceipt(result.transaction_hash);
           let txStatus = "failed";
-          if (txReceipt.isSuccess()) {
-            txStatus = "success";
-          }
 
-          console.log("Transaction hash:", result.transaction_hash);
-          console.log("Transaction status:", txStatus);
-          console.log("Transaction result:", txReceipt);
+          if (!actionConfig[entrypoint as keyof typeof actionConfig] || !actionConfig[entrypoint as keyof typeof actionConfig].waitForTx) {
+            txStatus = "success";
+          } else {
+            await provider.waitForTransaction(result.transaction_hash);
+            const txReceipt = await provider.getTransactionReceipt(result.transaction_hash);
+            if (txReceipt.isSuccess()) {
+              txStatus = "success";
+            }
+
+            console.log("Transaction hash:", result.transaction_hash);
+            console.log("Transaction status:", txStatus);
+            console.log("Transaction result:", txReceipt);
+          }
           sendMessageToUnity(
             unityData.id,
             JSON.stringify({

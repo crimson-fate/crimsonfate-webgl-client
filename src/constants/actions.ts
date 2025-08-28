@@ -35,10 +35,28 @@ export const Callback = {
 
 // map from action to callback
 export const actionConfig = {
-    [Action.request_random]: {
+    [Action.start_new_game]: {
+        waitForTx: false,
+    },
+    [Action.select_skill]: {
         waitForTx: false,
     },
     [Action.receive_skill]: {
+        waitForTx: false,
+    },
+    [Action.request_valor]: {
+        waitForTx: true,
+    },
+    [Action.bribe_valor]: {
+        waitForTx: true,
+    },
+    [Action.claim_chest]: {
+        waitForTx: true,
+    },
+    [Action.open_chest]: {
+        waitForTx: true,
+    },
+    [Action.claim_gem_from_valor]: {
         waitForTx: true,
     },
 };
